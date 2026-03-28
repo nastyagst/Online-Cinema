@@ -20,15 +20,17 @@ class TokenPayload(BaseModel):
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(
-        min_length=8, description="Password must be at least 8 characters long"
+        min_length=8,
+        max_length=72,
+        description="Password must be at least 8 characters long",
     )
 
     @field_validator("password")
     @classmethod
     def validate_password_complexity(cls, value: str) -> Self:
-        if not re.search(r"A-Z]", value):
+        if not re.search(r"[A-Z]", value):
             raise ValueError("Password must contain at least one uppercase letter")
-        if not re.search(r"a-z]", value):
+        if not re.search(r"[a-z]", value):
             raise ValueError("Password must contain at least one lowercase letter")
         if not re.search(r"[0-9]", value):
             raise ValueError("Password must contain at least one number")
