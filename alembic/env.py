@@ -6,14 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from src.db.database import Base
-from src.models.user import (
-    User,
-    UserGroup,
-    UserProfile,
-    ActivationToken,
-    PasswordResetToken,
-    RefreshToken,
-)
+from src.models import *
 
 from alembic import context
 
