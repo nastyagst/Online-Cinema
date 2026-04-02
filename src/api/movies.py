@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
+from src.api.dependencies import get_current_moderator
 from src.db.database import get_async_session
 from src.schemas.movie import MovieCreate, MovieRead, MovieUpdate
 from src.crud.movie import create_movie, get_movies, get_movie_by_id, delete_movie
@@ -10,7 +11,12 @@ from src.crud.movie import update_movie as crud_update_movie
 router = APIRouter(prefix="/api/movies", tags=["Movies"])
 
 
-@router.post("/", response_model=MovieRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=MovieRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_moderator)],
+)
 async def add_movie(
     movie_in: MovieCreate, session: AsyncSession = Depends(get_async_session)
 ):
@@ -25,8 +31,11 @@ async def read_movies(
     search: Optional[str] = Query(None, description="Search by title"),
     genre_id: Optional[int] = Query(None, description="Filter by genre ID"),
     year: Optional[int] = Query(None, description="Filter by release year"),
-    sort_by: str = Query("id_asc", description="Sorting: year_desc, year_asc, imdb_desc, price_asc, price_desc, id_asc"),
-    session: AsyncSession = Depends(get_async_session)
+    sort_by: str = Query(
+        "id_asc",
+        description="Sorting: year_desc, year_asc, imdb_desc, price_asc, price_desc, id_asc",
+    ),
+    session: AsyncSession = Depends(get_async_session),
 ):
     movies = await get_movies(
         session=session,
@@ -35,7 +44,7 @@ async def read_movies(
         search=search,
         genre_id=genre_id,
         year=year,
-        sort_by=sort_by
+        sort_by=sort_by,
     )
     return movies
 
@@ -48,7 +57,11 @@ async def read_movie(movie_id: int, session: AsyncSession = Depends(get_async_se
     return movie
 
 
-@router.put("/{movie_id}", response_model=MovieRead)
+@router.put(
+    "/{movie_id}",
+    response_model=MovieRead,
+    dependencies=[Depends(get_current_moderator)],
+)
 async def update_movie_endpoint(
     movie_id: int,
     movie_in: MovieUpdate,
@@ -61,11 +74,15 @@ async def update_movie_endpoint(
     return updated_movie
 
 
-@router.delete("/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{movie_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_current_moderator)],
+)
 async def delete_movie_endpoint(
     movie_id: int, session: AsyncSession = Depends(get_async_session)
 ):
     movie = await get_movie_by_id(session, movie_id)
     if movie is None:
-        raise HTTPException(status_code=404, detail="Movie is not found")
+        raise HTTPException(status_code=404, detail="Фільм не знайдено")
     await delete_movie(session, movie)
