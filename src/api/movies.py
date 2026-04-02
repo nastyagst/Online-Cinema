@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import List, Optional
 
 from src.db.database import get_async_session
 from src.schemas.movie import MovieCreate, MovieRead, MovieUpdate
@@ -20,9 +20,23 @@ async def add_movie(
 
 @router.get("/", response_model=List[MovieRead])
 async def read_movies(
-    skip: int = 0, limit: int = 10, session: AsyncSession = Depends(get_async_session)
+    skip: int = 0,
+    limit: int = 10,
+    search: Optional[str] = Query(None, description="Search by title"),
+    genre_id: Optional[int] = Query(None, description="Filter by genre ID"),
+    year: Optional[int] = Query(None, description="Filter by release year"),
+    sort_by: str = Query("id_asc", description="Sorting: year_desc, year_asc, imdb_desc, price_asc, price_desc, id_asc"),
+    session: AsyncSession = Depends(get_async_session)
 ):
-    movies = await get_movies(session, skip=skip, limit=limit)
+    movies = await get_movies(
+        session=session,
+        skip=skip,
+        limit=limit,
+        search=search,
+        genre_id=genre_id,
+        year=year,
+        sort_by=sort_by
+    )
     return movies
 
 

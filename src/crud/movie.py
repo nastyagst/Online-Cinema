@@ -1,23 +1,49 @@
 from typing import Optional
-from sqlalchemy import select
+from sqlalchemy import select, desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from src.models.movie import Movie, Genre, Director, Star
 from src.schemas.movie import MovieCreate, MovieUpdate
 
 
-async def get_movies(session: AsyncSession, skip: int = 0, limit: int = 10):
-    stmt = (
-        select(Movie)
-        .options(
-            joinedload(Movie.certification),
-            joinedload(Movie.genres),
-            joinedload(Movie.directors),
-            joinedload(Movie.stars),
-        )
-        .offset(skip)
-        .limit(limit)
+async def get_movies(
+    session: AsyncSession,
+    skip: int = 0,
+    limit: int = 10,
+    search: Optional[str] = None,
+    genre_id: Optional[int] = None,
+    year: Optional[int] = None,
+    sort_by: str = "id_asc",
+):
+    stmt = select(Movie).options(
+        joinedload(Movie.certification),
+        joinedload(Movie.genres),
+        joinedload(Movie.directors),
+        joinedload(Movie.stars),
     )
+    if search:
+        stmt = stmt.where(Movie.name.ilike(f"%{search}%"))
+    if year:
+        stmt = stmt.where(Movie.year == year)
+    if genre_id:
+        stmt = stmt.where(Movie.genres.any(Genre.id == genre_id))
+
+    if sort_by == "year_desc":
+        stmt = stmt.order_by(desc(Movie.year))
+    elif sort_by == "year_asc":
+        stmt = stmt.order_by(asc(Movie.year))
+    elif sort_by == "imdb_desc":
+        stmt = stmt.order_by(desc(Movie.imdb))
+    elif sort_by == "imdb_asc":
+        stmt = stmt.order_by(asc(Movie.imdb))
+    elif sort_by == "price_desc":
+        stmt = stmt.order_by(desc(Movie.price))
+    elif sort_by == "price_asc":
+        stmt = stmt.order_by(asc(Movie.price))
+    else:
+        stmt = stmt.order_by(asc(Movie.id))
+
+    stmt = stmt.offset(skip).limit(limit)
     result = await session.execute(stmt)
     return result.unique().scalars().all()
 
