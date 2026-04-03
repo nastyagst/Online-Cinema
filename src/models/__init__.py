@@ -7,3 +7,4 @@ from .user import (
     RefreshToken,
 )
 from .movie import Movie, Genre, Star, Director, Certification
+from .cart import Cart, CartItem

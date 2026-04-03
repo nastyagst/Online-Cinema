@@ -24,7 +24,7 @@ class CartItem(Base):
         Integer, ForeignKey("carts.id", ondelete="CASCADE"), nullable=False
     )
     movie_id = Column(
-        Integer, ForeignKey("movie.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
     )
     added_at = Column(DateTime(timezone=True), server_default=func.now())
 
