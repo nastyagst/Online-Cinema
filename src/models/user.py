@@ -63,6 +63,7 @@ class User(Base):
         "PasswordResetToken", back_populates="user", uselist=False
     )
     refresh_tokens = relationship("RefreshToken", back_populates="user")
+    cart = relationship("Cart", back_populates="user", uselist=False, lazy="joined")
 
 
 class UserProfile(Base):
