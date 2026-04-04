@@ -3,6 +3,7 @@ from src.api.auth import router as auth_router
 from src.api.movies import router as movies_router
 from src.api.metadata import router as metadata_router
 from src.api.cart import router as cart_router
+from src.api.orders import router as orders_router
 
 app = FastAPI(
     title="Online Cinema API",
@@ -14,6 +15,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(movies_router)
 app.include_router(metadata_router)
 app.include_router(cart_router, prefix="/api")
+app.include_router(orders_router, prefix="/api")
 
 
 @app.get("/ping")
