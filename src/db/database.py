@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = (
-    "postgresql+asyncpg://cinema_user:cinema_password@localhost:5432/cinema_db"
-)
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
