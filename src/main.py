@@ -10,6 +10,7 @@ app = FastAPI(
     title="Online Cinema API",
     description="API for managing movies, users, and orders",
     version="1.0.0",
+    swagger_ui_parameters={"persistAuthorization": True}
 )
 
 app.include_router(auth_router, prefix="/api")
