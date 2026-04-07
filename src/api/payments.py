@@ -114,7 +114,9 @@ async def stripe_webhook(
                     user_cart = cart_res.scalar_one_or_none()
 
                     if user_cart:
-                        movie_ids_in_order = [item.movie_id for item in order.items]
+                        items_stmt = select(OrderItem.movie_id).where(OrderItem.order_id == order.id)
+                        items_res = await session.execute(items_stmt)
+                        movie_ids_in_order = items_res.scalars().all()
 
                         if movie_ids_in_order:
                             delete_stmt = delete(CartItem).where(

@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from src.api.dependencies import get_current_moderator
+from src.api.dependencies import get_current_moderator, get_current_user
 from src.db.database import get_async_session
+from src.models import User, Movie, OrderItem, Order
+from src.models.order import OrderStatus
 from src.schemas.movie import MovieCreate, MovieRead, MovieUpdate
 from src.crud.movie import create_movie, get_movies, get_movie_by_id, delete_movie
 from src.crud.movie import update_movie as crud_update_movie
@@ -47,6 +50,25 @@ async def read_movies(
         sort_by=sort_by,
     )
     return movies
+
+
+@router.get("/purchased")
+async def get_purchased_movies(
+    session: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    stmt = (
+        select(Movie)
+        .join(OrderItem, Movie.id == OrderItem.movie_id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(Order.user_id == current_user.id, Order.status == OrderStatus.PAID)
+        .distinct()
+    )
+
+    result = await session.execute(stmt)
+    purchased_movies = result.scalars().all()
+
+    return purchased_movies
 
 
 @router.get("/{movie_id}", response_model=MovieRead)
