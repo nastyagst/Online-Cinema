@@ -1,8 +1,14 @@
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
+from dotenv import load_dotenv
+import os
 
-SECRET_KEY = "smth"
+load_dotenv()
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
