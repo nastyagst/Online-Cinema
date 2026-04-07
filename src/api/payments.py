@@ -13,6 +13,7 @@ from src.models.cart import Cart, CartItem
 from src.models.payment import Payment, PaymentStatus
 from src.schemas.payment import PaymentLink
 from src.core.security import STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+from src.tasks import send_payment_success_email
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -114,7 +115,9 @@ async def stripe_webhook(
                     user_cart = cart_res.scalar_one_or_none()
 
                     if user_cart:
-                        items_stmt = select(OrderItem.movie_id).where(OrderItem.order_id == order.id)
+                        items_stmt = select(OrderItem.movie_id).where(
+                            OrderItem.order_id == order.id
+                        )
                         items_res = await session.execute(items_stmt)
                         movie_ids_in_order = items_res.scalars().all()
 
@@ -124,6 +127,13 @@ async def stripe_webhook(
                                 CartItem.movie_id.in_(movie_ids_in_order),
                             )
                             await session.execute(delete_stmt)
+
+                    user_stmt = select(User.email).where(User.id == order.user_id)
+                    user_res = await session.execute(user_stmt)
+                    user_email = user_res.scalar_one_or_none()
+
+                    if user_email:
+                        send_payment_success_email.delay(user_email, order.id)
 
                     await session.commit()
             except Exception as e:
@@ -144,6 +154,7 @@ async def payment_success():
             </body>
         </html>
         """
+
 
 @router.get("/cancel", response_class=HTMLResponse)
 async def payment_cancel():
