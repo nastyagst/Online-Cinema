@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from src.api.dependencies import get_current_moderator, get_current_user
 from src.db.database import get_async_session
 from src.models import User, Movie, OrderItem, Order
+from src.models.movie import MovieReview
 from src.models.order import OrderStatus
 from src.schemas.movie import MovieCreate, MovieRead, MovieUpdate
 from src.crud.movie import create_movie, get_movies, get_movie_by_id, delete_movie
@@ -71,12 +72,39 @@ async def get_purchased_movies(
     return purchased_movies
 
 
-@router.get("/{movie_id}", response_model=MovieRead)
-async def read_movie(movie_id: int, session: AsyncSession = Depends(get_async_session)):
-    movie = await get_movie_by_id(session, movie_id)
-    if movie is None:
+@router.get("/{movie_id}")
+async def read_movie(
+        movie_id: int,
+        session: AsyncSession = Depends(get_async_session)
+):
+    stmt = (
+        select(
+            Movie,
+            func.avg(MovieReview.rating).label("avg_rating"),
+            func.count(MovieReview.id).label("reviews_count")
+        )
+        .outerjoin(MovieReview, Movie.id == MovieReview.movie_id)
+        .where(Movie.id == movie_id)
+        .group_by(Movie.id)
+    )
+
+    result = await session.execute(stmt)
+    data = result.one_or_none()
+
+    if data is None:
         raise HTTPException(status_code=404, detail="Movie is not found")
-    return movie
+
+    movie, avg_rating, reviews_count = data
+
+    return {
+        "id": movie.id,
+        "name": movie.name,
+        "description": movie.description,
+        "year": movie.year,
+        "price": movie.price,
+        "rating": round(float(avg_rating), 1) if avg_rating else 0.0,
+        "reviews_count": reviews_count
+    }
 
 
 @router.put(
