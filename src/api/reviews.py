@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import joinedload
 
 from src.db.database import get_async_session
 from src.models.movie import Movie, MovieReview
@@ -45,8 +46,41 @@ async def get_movie_reviews(
 ):
     stmt = (
         select(MovieReview)
+        .options(joinedload(MovieReview.user))
         .where(MovieReview.movie_id == movie_id)
         .order_by(MovieReview.created_at.desc())
     )
     result = await session.execute(stmt)
-    return result.scalars().all()
+    reviews = result.scalars().all()
+
+    return [
+        {
+            "id": review.id,
+            "user_email": review.user.email,
+            "rating": review.rating,
+            "text": review.text,
+            "created_at": review.created_at,
+        }
+        for review in reviews
+    ]
+
+
+@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_review(
+    review_id: int,
+    session: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user),
+):
+    review = await session.get(MovieReview, review_id)
+
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    if review.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="You can only delete your own reviews"
+        )
+
+    await session.delete(review)
+    await session.commit()
+    return None
