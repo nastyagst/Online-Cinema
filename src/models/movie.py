@@ -129,3 +129,21 @@ class Movie(Base):
     __table_args__ = (
         UniqueConstraint("name", "year", "time", name="uq_movie_name_year_time"),
     )
+
+
+class FavoriteMovie(Base):
+    __tablename__ = "favorite_movies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    movie_id = Column(
+        Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
+    )
+    __table_args__ = (
+        UniqueConstraint("user_id", "movie_id", name="unique_user_favorite"),
+    )
+
+    user = relationship("User", backref="favorites")
+    movie = relationship("Movie", backref="favorited_by")
