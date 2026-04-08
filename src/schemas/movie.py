@@ -1,7 +1,8 @@
 from __future__ import annotations
 import uuid
+from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class GenreRead(BaseModel):
@@ -94,5 +95,20 @@ class FavoriteMovieResponse(BaseModel):
 class FavoriteMovieRead(BaseModel):
     id: int
     movie: MovieShortResponse
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewCreate(BaseModel):
+    rating: int = Field(..., ge=1, le=10)
+    text: str | None = None
+
+
+class ReviewRead(BaseModel):
+    id: int
+    user_id: int
+    rating: int
+    text: str | None
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -8,6 +10,8 @@ from sqlalchemy import (
     Float,
     Numeric,
     UniqueConstraint,
+    DateTime,
+    CheckConstraint,
 )
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
@@ -147,3 +151,28 @@ class FavoriteMovie(Base):
 
     user = relationship("User", backref="favorites")
     movie = relationship("Movie", backref="favorited_by")
+
+
+class MovieReview(Base):
+    __tablename__ = "movie_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    movie_id = Column(
+        Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
+    )
+    rating = Column(Integer, nullable=False)
+    text = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+    __table_args__ = (
+        CheckConstraint("rating >= 1 AND rating <= 10", name="check_rating_range"),
+        UniqueConstraint("user_id", "movie_id", name="unique_user_movie_review"),
+    )
+
+    user = relationship("User", backref="reviews")
+    movie = relationship("Movie", backref="reviews")
