@@ -106,5 +106,5 @@ async def delete_movie_endpoint(
 ):
     movie = await get_movie_by_id(session, movie_id)
     if movie is None:
-        raise HTTPException(status_code=404, detail="Фільм не знайдено")
+        raise HTTPException(status_code=404, detail="Movie is not found")
     await delete_movie(session, movie)

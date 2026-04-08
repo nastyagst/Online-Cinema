@@ -73,3 +73,26 @@ class MovieUpdate(BaseModel):
     genre_ids: Optional[List[int]] = None
     director_ids: Optional[List[int]] = None
     star_ids: Optional[List[int]] = None
+
+
+class MovieShortResponse(BaseModel):
+    id: int
+    name: str
+    year: int
+    price: float
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FavoriteMovieResponse(BaseModel):
+    id: int
+    movie: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FavoriteMovieRead(BaseModel):
+    id: int
+    movie: MovieShortResponse
+
+    model_config = ConfigDict(from_attributes=True)
