@@ -7,14 +7,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+
 celery_app = Celery(
     "cinema_tasks",
-    broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
-    backend=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+    broker=REDIS_URL,
+    backend=REDIS_URL,
+)
+
+celery_app.conf.update(
+    task_track_started=True,
+    result_persistent=True,
+    timezone="Europe/Kyiv",
+    enable_utc=True,
 )
 
 
-@celery_app.task
+@celery_app.task(name="src.tasks.send_payment_success_email")
 def send_payment_success_email(email_to: str, order_id: int):
     smtp_user = os.getenv("SMTP_USER")
     smtp_password = os.getenv("SMTP_PASSWORD")
@@ -43,7 +52,7 @@ def send_payment_success_email(email_to: str, order_id: int):
         server.login(smtp_user, smtp_password)
         server.send_message(msg)
         server.quit()
-        return "Email sent successfully!"
+        return f"Email sent successfully to {email_to}!"
     except Exception as e:
         print(f"SMTP Error: {e}")
         raise e
