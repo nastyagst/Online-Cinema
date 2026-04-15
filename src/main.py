@@ -21,8 +21,8 @@ app.include_router(metadata_router)
 app.include_router(cart_router, prefix="/api")
 app.include_router(orders_router, prefix="/api")
 app.include_router(payments_router, prefix="/api")
-app.include_router(favorites_router)
-app.include_router(reviews_router)
+app.include_router(favorites_router, prefix="/api")
+app.include_router(reviews_router, prefix="/api")
 
 
 @app.get("/ping")

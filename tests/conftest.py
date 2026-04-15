@@ -12,6 +12,7 @@ from src.core.security import get_password_hash
 from src.models.user import UserGroup, UserGroupEnum, User
 from src.db.database import Base, get_async_session
 from src.main import app
+from src.models.movie import Certification
 
 load_dotenv()
 MAIN_DATABASE_URL = os.getenv("DATABASE_URL")
@@ -140,3 +141,19 @@ async def moderator_client(
     client.headers = client.headers.copy()
     client.headers["Authorization"] = f"Bearer {token}"
     return client
+
+
+@pytest_asyncio.fixture
+async def setup_certification(db_session: AsyncSession):
+    from sqlalchemy import select
+    query = select(Certification).where(Certification.name == "PG-13")
+    result = await db_session.execute(query)
+    cert = result.scalar_one_or_none()
+
+    if not cert:
+        cert = Certification(name="PG-13")
+        db_session.add(cert)
+        await db_session.commit()
+        await db_session.refresh(cert)
+
+    return cert

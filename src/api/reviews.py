@@ -56,6 +56,7 @@ async def get_movie_reviews(
     return [
         {
             "id": review.id,
+            "user_id": review.user_id,
             "user_email": review.user.email,
             "rating": review.rating,
             "text": review.text,
