@@ -36,7 +36,7 @@ async def add_to_favorites(
     return {"message": "Movie added to favorites"}
 
 
-@router.delete("/{movie.id}")
+@router.delete("/{movie_id}")
 async def remove_from_favorites(
     movie_id: int,
     session: AsyncSession = Depends(get_async_session),
