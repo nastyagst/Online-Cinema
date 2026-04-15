@@ -44,4 +44,6 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/online_cinema_test
           SECRET_KEY: "ci_test_key"
           STRIPE_SECRET_KEY: "sk_test"
-        run: pytest --cov=src tests/
+        run: |
+          alembic upgrade head
+          pytest --cov=src tests/
