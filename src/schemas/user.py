@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import Self
+import uuid  # noqa: F401
 import re
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict

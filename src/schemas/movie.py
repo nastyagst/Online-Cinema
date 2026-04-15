@@ -1,7 +1,9 @@
 from __future__ import annotations
+import uuid
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
+from src.schemas.movie import MovieRead
 
 
 class GenreRead(BaseModel):
@@ -111,3 +113,6 @@ class ReviewRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+MovieRead.model_rebuild()
