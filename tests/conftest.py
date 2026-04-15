@@ -18,16 +18,12 @@ load_dotenv()
 MAIN_DATABASE_URL = os.getenv("DATABASE_URL")
 
 if "localhost" not in MAIN_DATABASE_URL:
-    MAIN_DATABASE_URL = MAIN_DATABASE_URL.replace("@db:", "@localhost:").replace(
-        "@postgres:", "@localhost:"
-    )
+    MAIN_DATABASE_URL = MAIN_DATABASE_URL.replace("@db:", "@localhost:").replace("@postgres:", "@localhost:")
 
 TEST_DATABASE_URL = MAIN_DATABASE_URL.rsplit("/", 1)[0] + "/online_cinema_test"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False, poolclass=NullPool)
-TestingSessionLocal = sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
-)
+TestingSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -111,9 +107,7 @@ async def user_client(client: AsyncClient, setup_default_group):
 
 
 @pytest_asyncio.fixture
-async def moderator_client(
-    client: AsyncClient, setup_moderator_group, db_session: AsyncSession
-):
+async def moderator_client(client: AsyncClient, setup_moderator_group, db_session: AsyncSession):
     query = select(UserGroup.id).where(UserGroup.name == UserGroupEnum.MODERATOR)
     mod_group_id = await db_session.scalar(query)
 
@@ -133,9 +127,7 @@ async def moderator_client(
         db_session.add(new_mod)
         await db_session.commit()
 
-    login_response = await client.post(
-        "/api/auth/login", data={"username": mod_email, "password": mod_password}
-    )
+    login_response = await client.post("/api/auth/login", data={"username": mod_email, "password": mod_password})
     token = login_response.json()["access_token"]
 
     client.headers = client.headers.copy()
@@ -146,6 +138,7 @@ async def moderator_client(
 @pytest_asyncio.fixture
 async def setup_certification(db_session: AsyncSession):
     from sqlalchemy import select
+
     query = select(Certification).where(Certification.name == "PG-13")
     result = await db_session.execute(query)
     cert = result.scalar_one_or_none()

@@ -1,0 +1,47 @@
+name: Cinema CI/CD
+
+on:
+  push:
+    branches: [ main, feature/cicd-and-docs ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cinema_test
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black mypy pytest pytest-asyncio pytest-cov httpx
+          pip install fastapi uvicorn "pydantic[email]" pydantic-settings sqlalchemy asyncpg alembic "passlib[bcrypt]" pyjwt celery redis fastapi-mail python-multipart stripe
+
+      - name: Run Black check
+        run: black . --check
+
+      - name: Run Flake8
+        run: flake8 .
+
+      - name: Run Tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/cinema_test
+          SECRET_KEY: "ci_test_key"
+          STRIPE_SECRET_KEY: "sk_test"
+        run: pytest --cov=src tests/

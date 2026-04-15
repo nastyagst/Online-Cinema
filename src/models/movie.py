@@ -61,9 +61,7 @@ movie_stars = Table(
         ForeignKey("movies.id", ondelete="CASCADE"),
         primary_key=True,
     ),
-    Column(
-        "star_id", Integer, ForeignKey("stars.id", ondelete="CASCADE"), primary_key=True
-    ),
+    Column("star_id", Integer, ForeignKey("stars.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -91,9 +89,7 @@ class Director(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
 
-    movies = relationship(
-        "Movie", secondary=movie_directors, back_populates="directors"
-    )
+    movies = relationship("Movie", secondary=movie_directors, back_populates="directors")
 
 
 class Certification(Base):
@@ -109,9 +105,7 @@ class Movie(Base):
     __tablename__ = "movies"
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(
-        UUID(as_uuid=True), default=uuid.uuid4, unique=True, index=True, nullable=False
-    )
+    uuid = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     year = Column(Integer, nullable=False)
     time = Column(Integer, nullable=False)
@@ -125,29 +119,19 @@ class Movie(Base):
 
     certification = relationship("Certification", back_populates="movies")
     genres = relationship("Genre", secondary=movie_genres, back_populates="movies")
-    directors = relationship(
-        "Director", secondary=movie_directors, back_populates="movies"
-    )
+    directors = relationship("Director", secondary=movie_directors, back_populates="movies")
     stars = relationship("Star", secondary=movie_stars, back_populates="movies")
 
-    __table_args__ = (
-        UniqueConstraint("name", "year", "time", name="uq_movie_name_year_time"),
-    )
+    __table_args__ = (UniqueConstraint("name", "year", "time", name="uq_movie_name_year_time"),)
 
 
 class FavoriteMovie(Base):
     __tablename__ = "favorite_movies"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    movie_id = Column(
-        Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
-    )
-    __table_args__ = (
-        UniqueConstraint("user_id", "movie_id", name="unique_user_favorite"),
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    movie_id = Column(Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
+    __table_args__ = (UniqueConstraint("user_id", "movie_id", name="unique_user_favorite"),)
 
     user = relationship("User", backref="favorites")
     movie = relationship("Movie", backref="favorited_by")
@@ -157,17 +141,11 @@ class MovieReview(Base):
     __tablename__ = "movie_reviews"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    movie_id = Column(
-        Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    movie_id = Column(Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
     rating = Column(Integer, nullable=False)
     text = Column(Text, nullable=True)
-    created_at = Column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 10", name="check_rating_range"),

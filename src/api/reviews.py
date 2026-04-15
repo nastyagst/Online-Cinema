@@ -23,16 +23,12 @@ async def create_review(
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found")
 
-    stmt = select(MovieReview).where(
-        MovieReview.user_id == current_user.id, MovieReview.movie_id == movie_id
-    )
+    stmt = select(MovieReview).where(MovieReview.user_id == current_user.id, MovieReview.movie_id == movie_id)
     res = await session.execute(stmt)
     if res.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="You already reviewed this movie")
 
-    new_review = MovieReview(
-        user_id=current_user.id, movie_id=movie_id, **review_data.model_dump()
-    )
+    new_review = MovieReview(user_id=current_user.id, movie_id=movie_id, **review_data.model_dump())
 
     session.add(new_review)
     await session.commit()
@@ -41,9 +37,7 @@ async def create_review(
 
 
 @router.get("/", response_model=list[ReviewRead])
-async def get_movie_reviews(
-    movie_id: int, session: AsyncSession = Depends(get_async_session)
-):
+async def get_movie_reviews(movie_id: int, session: AsyncSession = Depends(get_async_session)):
     stmt = (
         select(MovieReview)
         .options(joinedload(MovieReview.user))
@@ -78,9 +72,7 @@ async def delete_my_review(
         raise HTTPException(status_code=404, detail="Review not found")
 
     if review.user_id != current_user.id:
-        raise HTTPException(
-            status_code=403, detail="You can only delete your own reviews"
-        )
+        raise HTTPException(status_code=403, detail="You can only delete your own reviews")
 
     await session.delete(review)
     await session.commit()

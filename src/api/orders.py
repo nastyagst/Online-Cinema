@@ -22,22 +22,16 @@ async def place_order(
     current_user: User = Depends(get_current_user),
 ):
     cart_query = (
-        select(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.movie))
-        .where(Cart.user_id == current_user.id)
+        select(Cart).options(joinedload(Cart.items).joinedload(CartItem.movie)).where(Cart.user_id == current_user.id)
     )
     cart_result = await session.execute(cart_query)
     cart = cart_result.unique().scalar_one_or_none()
 
     if not cart or not cart.items:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Your cart is empty"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Your cart is empty")
 
     purchased_query = (
-        select(OrderItem.movie_id)
-        .join(Order)
-        .where(Order.user_id == current_user.id, Order.status == OrderStatus.PAID)
+        select(OrderItem.movie_id).join(Order).where(Order.user_id == current_user.id, Order.status == OrderStatus.PAID)
     )
     purchased_result = await session.execute(purchased_query)
     purchased_ids = set(purchased_result.scalars().all())
@@ -45,15 +39,11 @@ async def place_order(
     valid_items = [item for item in cart.items if item.movie_id not in purchased_ids]
 
     if not valid_items:
-        raise HTTPException(
-            status_code=400, detail="All movies in your cart were already purchased."
-        )
+        raise HTTPException(status_code=400, detail="All movies in your cart were already purchased.")
 
     total_amount = sum(item.movie.price for item in cart.items)
 
-    new_order = Order(
-        user_id=current_user.id, status=OrderStatus.PENDING, total_amount=total_amount
-    )
+    new_order = Order(user_id=current_user.id, status=OrderStatus.PENDING, total_amount=total_amount)
     session.add(new_order)
     await session.flush()
 
@@ -73,18 +63,10 @@ async def place_order(
     final_query = (
         select(Order)
         .options(
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.certification),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.genres),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.directors),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.stars),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.certification),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.genres),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.directors),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.stars),
         )
         .where(Order.id == new_order.id)
     )
@@ -101,18 +83,10 @@ async def get_my_orders(
     query = (
         select(Order)
         .options(
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.genres),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.certification),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.directors),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.stars),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.genres),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.certification),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.directors),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.stars),
         )
         .where(Order.user_id == current_user.id)
         .order_by(Order.created_at.desc())
@@ -132,18 +106,10 @@ async def get_all_orders(
     query = (
         select(Order)
         .options(
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.certification),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.genres),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.directors),
-            selectinload(Order.items)
-            .selectinload(OrderItem.movie)
-            .selectinload(Movie.stars),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.certification),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.genres),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.directors),
+            selectinload(Order.items).selectinload(OrderItem.movie).selectinload(Movie.stars),
         )
         .order_by(Order.created_at.desc())
     )

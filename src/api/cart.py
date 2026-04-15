@@ -29,9 +29,7 @@ async def add_to_cart(
         session.add(cart)
         await session.flush()
 
-    item_query = select(CartItem).where(
-        CartItem.cart_id == cart.id, CartItem.movie_id == item_in.movie_id
-    )
+    item_query = select(CartItem).where(CartItem.cart_id == cart.id, CartItem.movie_id == item_in.movie_id)
     item_result = await session.execute(item_query)
     if item_result.scalar_one_or_none():
         raise HTTPException(
@@ -46,18 +44,10 @@ async def add_to_cart(
     final_query = (
         select(Cart)
         .options(
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.certification),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.genres),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.directors),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.stars),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.certification),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.genres),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.directors),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.stars),
         )
         .where(Cart.id == cart.id)
     )
@@ -74,18 +64,10 @@ async def get_my_cart(
     query = (
         select(Cart)
         .options(
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.certification),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.genres),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.directors),
-            selectinload(Cart.items)
-            .selectinload(CartItem.movie)
-            .selectinload(Movie.stars),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.certification),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.genres),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.directors),
+            selectinload(Cart.items).selectinload(CartItem.movie).selectinload(Movie.stars),
         )
         .where(Cart.user_id == current_user.id)
     )
@@ -103,11 +85,7 @@ async def remove_from_cart(
     session: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_user),
 ):
-    stmt = (
-        select(CartItem)
-        .join(Cart)
-        .where(CartItem.id == item_id, Cart.user_id == current_user.id)
-    )
+    stmt = select(CartItem).join(Cart).where(CartItem.id == item_id, Cart.user_id == current_user.id)
     result = await session.execute(stmt)
     item = result.scalar_one_or_none()
 

@@ -88,12 +88,8 @@ async def create_movie(session: AsyncSession, movie_in: MovieCreate) -> Movie:
     return await get_movie_by_id(session, db_movie.id)
 
 
-async def update_movie(
-    session: AsyncSession, db_movie: Movie, movie_in: MovieUpdate
-) -> Movie:
-    update_data = movie_in.model_dump(
-        exclude_unset=True, exclude={"genre_ids", "director_ids", "star_ids"}
-    )
+async def update_movie(session: AsyncSession, db_movie: Movie, movie_in: MovieUpdate) -> Movie:
+    update_data = movie_in.model_dump(exclude_unset=True, exclude={"genre_ids", "director_ids", "star_ids"})
     for field, value in update_data.items():
         setattr(db_movie, field, value)
 

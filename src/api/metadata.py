@@ -13,25 +13,17 @@ class NameSchema(BaseModel):
 
 
 @router.post("/genres", response_model=GenreRead, status_code=status.HTTP_201_CREATED)
-async def add_genre(
-    data: NameSchema, session: AsyncSession = Depends(get_async_session)
-):
+async def add_genre(data: NameSchema, session: AsyncSession = Depends(get_async_session)):
     return await metadata.create_genre(session, data.name)
 
 
 @router.post("/stars", response_model=StarRead, status_code=status.HTTP_201_CREATED)
-async def add_star(
-    data: NameSchema, session: AsyncSession = Depends(get_async_session)
-):
+async def add_star(data: NameSchema, session: AsyncSession = Depends(get_async_session)):
     return await metadata.create_star(session, data.name)
 
 
-@router.post(
-    "/directors", response_model=DirectorRead, status_code=status.HTTP_201_CREATED
-)
-async def add_director(
-    data: NameSchema, session: AsyncSession = Depends(get_async_session)
-):
+@router.post("/directors", response_model=DirectorRead, status_code=status.HTTP_201_CREATED)
+async def add_director(data: NameSchema, session: AsyncSession = Depends(get_async_session)):
     return await metadata.create_director(session, data.name)
 
 
@@ -40,7 +32,5 @@ async def add_director(
     response_model=CertificationRead,
     status_code=status.HTTP_201_CREATED,
 )
-async def add_certification(
-    data: NameSchema, session: AsyncSession = Depends(get_async_session)
-):
+async def add_certification(data: NameSchema, session: AsyncSession = Depends(get_async_session)):
     return await metadata.create_certification(session, data.name)
