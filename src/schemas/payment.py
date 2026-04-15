@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 from decimal import Decimal
-from .order import OrderRead
 
 
 class PaymentRead(BaseModel):
