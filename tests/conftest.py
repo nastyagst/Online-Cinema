@@ -16,8 +16,11 @@ from src.models.movie import Certification
 load_dotenv()
 MAIN_DATABASE_URL = os.getenv("DATABASE_URL")
 
-if "localhost" not in MAIN_DATABASE_URL:
-    MAIN_DATABASE_URL = MAIN_DATABASE_URL.replace("@db:", "@localhost:").replace("@postgres:", "@localhost:")
+if os.path.exists("/.dockerenv"):
+    pass
+else:
+    if MAIN_DATABASE_URL and "localhost" not in MAIN_DATABASE_URL:
+        MAIN_DATABASE_URL = MAIN_DATABASE_URL.replace("@db:", "@localhost:").replace("@postgres:", "@localhost:")
 
 TEST_DATABASE_URL = MAIN_DATABASE_URL.rsplit("/", 1)[0] + "/online_cinema_test"
 
