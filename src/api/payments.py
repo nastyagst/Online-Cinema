@@ -71,6 +71,12 @@ async def create_checkout_session(
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, session: AsyncSession = Depends(get_async_session)):
+    """
+    **Stripe Webhook handler.**
+
+    Processes asynchronous notifications from Stripe.
+    Updates order status to **PAID** upon successful checkout.
+    """
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 

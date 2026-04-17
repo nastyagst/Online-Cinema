@@ -60,6 +60,12 @@ async def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_async_session),
 ):
+    """
+    **Authenticate user and return access token.**
+
+    Tokens are valid for 30 minutes. Use the returned token in the
+    'Authorize' header for protected routes.
+    """
     query = select(User).options(selectinload(User.group)).where(User.email == form_data.username)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
