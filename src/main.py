@@ -34,9 +34,8 @@ app.include_router(favorites_router, prefix="/api")
 app.include_router(reviews_router, prefix="/api")
 
 
-# Защита Swagger
 @app.get("/docs", include_in_schema=False)
-async def protected_swagger_ui_html(current_user: User = Depends(get_current_user)):
+async def protected_swagger_ui_html():
     return get_swagger_ui_html(
         openapi_url="/api/openapi.json",
         title=app.title + " - Swagger UI",
@@ -45,7 +44,7 @@ async def protected_swagger_ui_html(current_user: User = Depends(get_current_use
 
 
 @app.get("/api/openapi.json", include_in_schema=False)
-async def get_open_api_endpoint(current_user: User = Depends(get_current_user)):
+async def get_open_api_endpoint():
     return get_openapi(title=app.title, version=app.version, routes=app.routes)
 
 
