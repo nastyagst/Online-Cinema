@@ -22,6 +22,12 @@ router = APIRouter(prefix="/api/movies", tags=["Movies"])
     dependencies=[Depends(get_current_moderator)],
 )
 async def add_movie(movie_in: MovieCreate, session: AsyncSession = Depends(get_async_session)):
+    """
+    **Create a new movie record.**
+
+    Restricted access: Requires **Moderator** or **Admin** privileges.
+    Verifies the provided JWT token and adds a new movie to the database.
+    """
     new_movie = await create_movie(session, movie_in)
     return new_movie
 
