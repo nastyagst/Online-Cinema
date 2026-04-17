@@ -16,7 +16,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: online_cinema_test
-        ports: ["5432:5432"]
+        ports: [ "5432:5432" ]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
@@ -44,6 +44,24 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/online_cinema_test
           SECRET_KEY: "ci_test_key"
           STRIPE_SECRET_KEY: "sk_test"
+          PYTHONPATH: .
         run: |
-          alembic upgrade head
-          pytest --cov=src tests/
+          python -m alembic upgrade head
+          python -m pytest --cov=src tests/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-test-lint
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd Online-Cinema
+            git pull origin main
+            docker-compose up -d --build
+            docker-compose exec -T backend alembic upgrade head
