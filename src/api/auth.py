@@ -20,9 +20,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def register_user(
-    user_in: UserCreate, session: AsyncSession = Depends(get_async_session)
-):
+async def register_user(user_in: UserCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(User).where(User.email == user_in.email)
     result = await session.execute(query)
     if result.scalar_one_or_none():
@@ -52,9 +50,7 @@ async def register_user(
     await session.commit()
 
     final_query = await session.execute(
-        select(User)
-        .options(selectinload(User.group), selectinload(User.profile))
-        .where(User.id == new_user.id)
+        select(User).options(selectinload(User.group), selectinload(User.profile)).where(User.id == new_user.id)
     )
     return final_query.scalar_one()
 
@@ -64,11 +60,7 @@ async def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_async_session),
 ):
-    query = (
-        select(User)
-        .options(selectinload(User.group))
-        .where(User.email == form_data.username)
-    )
+    query = select(User).options(selectinload(User.group)).where(User.email == form_data.username)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
@@ -82,9 +74,7 @@ async def login_user(
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
     expires_at = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    db_refresh_token = RefreshToken(
-        user_id=user.id, token=refresh_token, expires_at=expires_at
-    )
+    db_refresh_token = RefreshToken(user_id=user.id, token=refresh_token, expires_at=expires_at)
     session.add(db_refresh_token)
     await session.commit()
 

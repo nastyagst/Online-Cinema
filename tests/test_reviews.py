@@ -29,9 +29,7 @@ async def created_movie(moderator_client: AsyncClient, setup_certification):
 @pytest.mark.asyncio
 async def test_create_review(user_client: AsyncClient, created_movie: dict):
     payload = {"rating": 9, "text": "Great movie!"}
-    response = await user_client.post(
-        f"/api/movies/{created_movie['id']}/reviews/", json=payload
-    )
+    response = await user_client.post(f"/api/movies/{created_movie['id']}/reviews/", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["rating"] == 9
@@ -42,9 +40,7 @@ async def test_create_review(user_client: AsyncClient, created_movie: dict):
 async def test_create_duplicate_review(user_client: AsyncClient, created_movie: dict):
     payload = {"rating": 8, "text": "Good"}
     await user_client.post(f"/api/movies/{created_movie['id']}/reviews/", json=payload)
-    response = await user_client.post(
-        f"/api/movies/{created_movie['id']}/reviews/", json=payload
-    )
+    response = await user_client.post(f"/api/movies/{created_movie['id']}/reviews/", json=payload)
     assert response.status_code == 400
     assert response.json()["detail"] == "You already reviewed this movie"
 
@@ -67,13 +63,9 @@ async def test_get_movie_reviews(user_client: AsyncClient, created_movie: dict):
 @pytest.mark.asyncio
 async def test_delete_my_review(user_client: AsyncClient, created_movie: dict):
     payload = {"rating": 5, "text": "Average"}
-    create_resp = await user_client.post(
-        f"/api/movies/{created_movie['id']}/reviews/", json=payload
-    )
+    create_resp = await user_client.post(f"/api/movies/{created_movie['id']}/reviews/", json=payload)
     review_id = create_resp.json()["id"]
-    del_resp = await user_client.delete(
-        f"/api/movies/{created_movie['id']}/reviews/{review_id}"
-    )
+    del_resp = await user_client.delete(f"/api/movies/{created_movie['id']}/reviews/{review_id}")
     assert del_resp.status_code == 204
     get_resp = await user_client.get(f"/api/movies/{created_movie['id']}/reviews/")
     assert len(get_resp.json()) == 0
@@ -87,9 +79,7 @@ async def test_delete_other_user_review(
     setup_default_group,
 ):
     payload = {"rating": 2, "text": "Bad"}
-    create_resp = await moderator_client.post(
-        f"/api/movies/{created_movie['id']}/reviews/", json=payload
-    )
+    create_resp = await moderator_client.post(f"/api/movies/{created_movie['id']}/reviews/", json=payload)
     review_id = create_resp.json()["id"]
 
     query = select(UserGroup.id).where(UserGroup.name == UserGroupEnum.USER)
@@ -115,9 +105,7 @@ async def test_delete_other_user_review(
     hacker_token = login_resp.json()["access_token"]
 
     moderator_client.headers = {"Authorization": f"Bearer {hacker_token}"}
-    del_resp = await moderator_client.delete(
-        f"/api/movies/{created_movie['id']}/reviews/{review_id}"
-    )
+    del_resp = await moderator_client.delete(f"/api/movies/{created_movie['id']}/reviews/{review_id}")
 
     assert del_resp.status_code == 403
     assert del_resp.json()["detail"] == "You can only delete your own reviews"

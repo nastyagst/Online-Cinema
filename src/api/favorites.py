@@ -22,9 +22,7 @@ async def add_to_favorites(
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found")
 
-    stmt = select(FavoriteMovie).where(
-        FavoriteMovie.user_id == current_user.id, FavoriteMovie.movie_id == movie_id
-    )
+    stmt = select(FavoriteMovie).where(FavoriteMovie.user_id == current_user.id, FavoriteMovie.movie_id == movie_id)
     result = await session.execute(stmt)
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Movie already in favorites")
@@ -42,9 +40,7 @@ async def remove_from_favorites(
     session: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_user),
 ):
-    stmt = delete(FavoriteMovie).where(
-        FavoriteMovie.user_id == current_user.id, FavoriteMovie.movie_id == movie_id
-    )
+    stmt = delete(FavoriteMovie).where(FavoriteMovie.user_id == current_user.id, FavoriteMovie.movie_id == movie_id)
     result = await session.execute(stmt)
 
     if result.rowcount == 0:
@@ -60,9 +56,7 @@ async def get_my_favorites(
     current_user: User = Depends(get_current_user),
 ):
     stmt = (
-        select(FavoriteMovie)
-        .options(joinedload(FavoriteMovie.movie))
-        .where(FavoriteMovie.user_id == current_user.id)
+        select(FavoriteMovie).options(joinedload(FavoriteMovie.movie)).where(FavoriteMovie.user_id == current_user.id)
     )
     result = await session.execute(stmt)
     favorites = result.scalars().all()

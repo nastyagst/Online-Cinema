@@ -70,20 +70,16 @@ async def create_checkout_session(
 
 
 @router.post("/webhook")
-async def stripe_webhook(
-    request: Request, session: AsyncSession = Depends(get_async_session)
-):
+async def stripe_webhook(request: Request, session: AsyncSession = Depends(get_async_session)):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
     try:
 
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     if event.type == "checkout.session.completed":
@@ -115,9 +111,7 @@ async def stripe_webhook(
                     user_cart = cart_res.scalar_one_or_none()
 
                     if user_cart:
-                        items_stmt = select(OrderItem.movie_id).where(
-                            OrderItem.order_id == order.id
-                        )
+                        items_stmt = select(OrderItem.movie_id).where(OrderItem.order_id == order.id)
                         items_res = await session.execute(items_stmt)
                         movie_ids_in_order = items_res.scalars().all()
 

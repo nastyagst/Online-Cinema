@@ -112,3 +112,6 @@ class ReviewRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+MovieRead.model_rebuild()

@@ -21,9 +21,7 @@ router = APIRouter(prefix="/api/movies", tags=["Movies"])
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_moderator)],
 )
-async def add_movie(
-    movie_in: MovieCreate, session: AsyncSession = Depends(get_async_session)
-):
+async def add_movie(movie_in: MovieCreate, session: AsyncSession = Depends(get_async_session)):
     new_movie = await create_movie(session, movie_in)
     return new_movie
 
@@ -73,15 +71,10 @@ async def get_purchased_movies(
 
 
 @router.get("/{movie_id}")
-async def read_movie(
-        movie_id: int,
-        session: AsyncSession = Depends(get_async_session)
-):
+async def read_movie(movie_id: int, session: AsyncSession = Depends(get_async_session)):
     stmt = (
         select(
-            Movie,
-            func.avg(MovieReview.rating).label("avg_rating"),
-            func.count(MovieReview.id).label("reviews_count")
+            Movie, func.avg(MovieReview.rating).label("avg_rating"), func.count(MovieReview.id).label("reviews_count")
         )
         .outerjoin(MovieReview, Movie.id == MovieReview.movie_id)
         .where(Movie.id == movie_id)
@@ -103,7 +96,7 @@ async def read_movie(
         "year": movie.year,
         "price": movie.price,
         "rating": round(float(avg_rating), 1) if avg_rating else 0.0,
-        "reviews_count": reviews_count
+        "reviews_count": reviews_count,
     }
 
 
@@ -129,9 +122,7 @@ async def update_movie_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(get_current_moderator)],
 )
-async def delete_movie_endpoint(
-    movie_id: int, session: AsyncSession = Depends(get_async_session)
-):
+async def delete_movie_endpoint(movie_id: int, session: AsyncSession = Depends(get_async_session)):
     movie = await get_movie_by_id(session, movie_id)
     if movie is None:
         raise HTTPException(status_code=404, detail="Movie is not found")

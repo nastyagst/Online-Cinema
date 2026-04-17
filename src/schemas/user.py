@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import Self
+import uuid  # noqa: F401
 import re
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
@@ -35,9 +36,7 @@ class UserCreate(BaseModel):
         if not re.search(r"[0-9]", value):
             raise ValueError("Password must contain at least one number")
         if not re.search(r"[`~/.,!@#*<>_&=+]", value):
-            raise ValueError(
-                "Password must contain at least one special character (e.g., !, @, #, *)"
-            )
+            raise ValueError("Password must contain at least one special character (e.g., !, @, #, *)")
         return value
 
 

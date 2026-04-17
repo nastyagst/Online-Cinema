@@ -5,8 +5,8 @@ from .user import (
     ActivationToken,
     PasswordResetToken,
     RefreshToken,
-)
-from .movie import Movie, Genre, Star, Director, Certification
-from .cart import Cart, CartItem
-from .order import Order, OrderItem
-from .payment import Payment, PaymentItem
+)  # noqa: F401
+from .movie import Movie, Genre, Star, Director, Certification  # noqa: F401
+from .cart import Cart, CartItem  # noqa: F401
+from .order import Order, OrderItem  # noqa: F401
+from .payment import Payment, PaymentItem  # noqa: F401

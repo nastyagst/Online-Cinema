@@ -21,9 +21,7 @@ async def create_test_user(db_session, email, password, group_name):
 
 
 async def get_token(client, email, password):
-    resp = await client.post(
-        "/api/auth/login", data={"username": email, "password": password}
-    )
+    resp = await client.post("/api/auth/login", data={"username": email, "password": password})
     return resp.json()["access_token"]
 
 
@@ -77,24 +75,18 @@ async def setup_data(
 
 @pytest.mark.asyncio
 async def test_place_order(client: AsyncClient, setup_data: dict):
-    resp = await client.post(
-        "/api/orders/", headers={"Authorization": f"Bearer {setup_data['user_token']}"}
-    )
+    resp = await client.post("/api/orders/", headers={"Authorization": f"Bearer {setup_data['user_token']}"})
     assert resp.status_code == 200
     assert resp.json()["status"] == "pending"
 
 
 @pytest.mark.asyncio
-async def test_place_order_empty_cart(
-    client: AsyncClient, db_session, setup_default_group
-):
+async def test_place_order_empty_cart(client: AsyncClient, db_session, setup_default_group):
     email, password = f"empty_{uuid.uuid4().hex[:4]}@t.com", "Pass123!"
     await create_test_user(db_session, email, password, UserGroupEnum.USER)
     token = await get_token(client, email, password)
 
-    resp = await client.post(
-        "/api/orders/", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = await client.post("/api/orders/", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 400
 
 
@@ -109,9 +101,7 @@ async def test_get_my_orders(client: AsyncClient, setup_data: dict):
 
 @pytest.mark.asyncio
 async def test_get_all_orders_moderator(client: AsyncClient, setup_data: dict):
-    await client.post(
-        "/api/orders/", headers={"Authorization": f"Bearer {setup_data['user_token']}"}
-    )
+    await client.post("/api/orders/", headers={"Authorization": f"Bearer {setup_data['user_token']}"})
     resp = await client.get(
         "/api/orders/all",
         headers={"Authorization": f"Bearer {setup_data['mod_token']}"},

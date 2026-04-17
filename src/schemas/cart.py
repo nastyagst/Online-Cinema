@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from src.schemas.movie import MovieRead
+
+import uuid  # noqa: F401
 
 
 class CartItemCreate(BaseModel):
@@ -21,3 +23,6 @@ class CartRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+CartRead.model_rebuild()

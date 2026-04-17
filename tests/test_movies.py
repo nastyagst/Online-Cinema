@@ -36,7 +36,7 @@ def movie_data(setup_certification):
         "certification_id": setup_certification.id,
         "genre_ids": [],
         "director_ids": [],
-        "star_ids": []
+        "star_ids": [],
     }
 
 
