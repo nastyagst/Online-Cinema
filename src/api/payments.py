@@ -60,8 +60,8 @@ async def create_checkout_session(
             payment_method_types=["card"],
             line_items=line_items,
             mode="payment",
-            success_url="http://localhost:8002/api/payments/success",
-            cancel_url="http://localhost:8002/api/payments/cancel",
+            success_url="http://13.62.248.27:8002/api/payments/success",
+            cancel_url="http://13.62.248.27:8002/api/payments/cancel",
             metadata={"order_id": str(order.id)},
         )
         return {"checkout_url": checkout_session.url}
