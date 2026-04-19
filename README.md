@@ -55,8 +55,7 @@ All endpoints are documented using **Swagger UI**.
 ##  Testing & Demo Credentials
 
 ### 1. Pre-created Accounts
-You can test protected routes using these credentials:
-* **Admin/Moderator:** `admin@example.com` / `adminAdmin1@`
+You can register a new account via `/api/auth/register` or use the following pre-created account:
 * **Regular User:** `user@test.com` / `UserPass123!`
 
 ### 2. Stripe Test Card (Sandbox)
